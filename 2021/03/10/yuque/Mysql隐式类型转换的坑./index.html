@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?6a07862605bf61649cef6661c37f33ac";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/image/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="场景描述:当十年之前的影片重映时，其会生成一个新的专资编码出来。《阿凡达》重映导致其专资编码发生变更.写了这样一条 sql 去更新其专资编码。但是在后期查询的时候却无法查询到该条数据。排查代码看起来一切正常。dao 层xml 文件 我们注意到,代码中 movieCode 是 String 类型的,而我们更新表的时候却没加单引号或双引号，而 Mysq 对这种隐式类型转化会将前置 0 给删除掉。导致了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql隐式类型转换的坑.">
+<meta property="og:url" content="http://yoursite.com/2021/03/10/yuque/Mysql%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E7%9A%84%E5%9D%91./index.html">
+<meta property="og:site_name" content="Hang_c&#39;s Blog">
+<meta property="og:description" content="场景描述:当十年之前的影片重映时，其会生成一个新的专资编码出来。《阿凡达》重映导致其专资编码发生变更.写了这样一条 sql 去更新其专资编码。但是在后期查询的时候却无法查询到该条数据。排查代码看起来一切正常。dao 层xml 文件 我们注意到,代码中 movieCode 是 String 类型的,而我们更新表的时候却没加单引号或双引号，而 Mysq 对这种隐式类型转化会将前置 0 给删除掉。导致了">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354155594-53ca7c1e-aaf6-4b9b-abea-bc914a45190d.png#align=left&display=inline&height=282&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.25.55.png&originHeight=282&originWidth=2234&size=70772&status=done&style=none&width=2234">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354254819-d3de1301-0866-418f-af56-f8ef504ff687.png#align=left&display=inline&height=326&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.29.57.png&originHeight=326&originWidth=1464&size=57912&status=done&style=none&width=1464">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354340023-e5d07997-dea7-4665-bfde-796901b5a398.png#align=left&display=inline&height=426&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.31.57.png&originHeight=426&originWidth=1902&size=79031&status=done&style=none&width=1902">
+<meta property="article:published_time" content="2021-03-10T05:11:58.000Z">
+<meta property="article:modified_time" content="2021-03-27T07:24:56.345Z">
+<meta property="article:author" content="陈航">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354155594-53ca7c1e-aaf6-4b9b-abea-bc914a45190d.png#align=left&display=inline&height=282&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.25.55.png&originHeight=282&originWidth=2234&size=70772&status=done&style=none&width=2234">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/03/10/yuque/Mysql隐式类型转换的坑./"/>
+
+
+
+
+
+  <title>Mysql隐式类型转换的坑. | Hang_c's Blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hang_c's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">赏我一个银牌啊!</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-首页">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-归档">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-小游戏">
+          <a href="/game/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-gamepad"></i> <br />
+            
+            小游戏
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/03/10/yuque/Mysql%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E7%9A%84%E5%9D%91./">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="陈航">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/image/blog-logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hang_c's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Mysql隐式类型转换的坑.</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-10T05:11:58+00:00">
+                2021-03-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/10/yuque/Mysql%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E7%9A%84%E5%9D%91./#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2021/03/10/yuque/Mysql%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E7%9A%84%E5%9D%91./" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/03/10/yuque/Mysql%E9%9A%90%E5%BC%8F%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E7%9A%84%E5%9D%91./" class="leancloud_visitors" data-flag-title="Mysql隐式类型转换的坑.">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+				 <span>次</span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="场景描述"><a href="#场景描述" class="headerlink" title="场景描述:"></a>场景描述:</h1><p>当十年之前的影片重映时，其会生成一个新的专资编码出来。《阿凡达》重映导致其专资编码发生变更.<br>写了这样一条 sql 去更新其专资编码。<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354155594-53ca7c1e-aaf6-4b9b-abea-bc914a45190d.png#align=left&display=inline&height=282&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.25.55.png&originHeight=282&originWidth=2234&size=70772&status=done&style=none&width=2234" alt="截屏2021-03-10 13.25.55.png"><br>但是在后期查询的时候却无法查询到该条数据。<br>排查代码看起来一切正常。<br>dao 层<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354254819-d3de1301-0866-418f-af56-f8ef504ff687.png#align=left&display=inline&height=326&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.29.57.png&originHeight=326&originWidth=1464&size=57912&status=done&style=none&width=1464" alt="截屏2021-03-10 13.29.57.png"><br>xml 文件<br><img src="https://cdn.nlark.com/yuque/0/2021/png/12779184/1615354340023-e5d07997-dea7-4665-bfde-796901b5a398.png#align=left&display=inline&height=426&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-03-10%2013.31.57.png&originHeight=426&originWidth=1902&size=79031&status=done&style=none&width=1902" alt="截屏2021-03-10 13.31.57.png"></p>
+<p>我们注意到,代码中 movieCode 是 String 类型的,而我们更新表的时候却没加单引号或双引号，而 Mysq 对这种隐式类型转化会将前置 0 给删除掉。导致了无法查询到数据的 bug.</p>
+<h1 id="这里有两点需要说明"><a href="#这里有两点需要说明" class="headerlink" title="这里有两点需要说明"></a>这里有两点需要说明</h1><h2 id="1-为什么-update-的时候可以匹配到数据"><a href="#1-为什么-update-的时候可以匹配到数据" class="headerlink" title="1.为什么 update 的时候可以匹配到数据?"></a>1.为什么 update 的时候可以匹配到数据?</h2><p>如果我们写这样的 sql 语句.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> <span class="keyword">table</span> <span class="keyword">set</span> cloumn = <span class="number">0002000</span> <span class="keyword">where</span> cloumn = <span class="number">000100</span>;</span><br></pre></td></tr></table></figure>
+
+<p>假设这里的列是 varchar 类型的, 那么 sql 执行查询时 会将 where 条件后的前缀 0 都去掉</p>
+<ul>
+<li>00001000 会变为 1000</li>
+<li>0012300 会变为 12300</li>
+</ul>
+<p>即 无论前缀有多少个 0 都会进行删除. 然后匹配的时候 也会对已有的 varchar 类型做一个去前缀 0 的操作。<br>假设 where 条件 column = 012340 隐式转为 ‘12340’. 表里假如有 cloumn = ‘0012340’, column = ‘00012340’都将与该条件匹配.</p>
+<p>隐式类型转换规则</p>
+<ul>
+<li>“000123 你好 abc123” 转 数字会变为 123</li>
+<li>“000123” 会变为 123</li>
+<li>“123abc 你好” 会变为 123</li>
+<li>“你好李焕英” 会变为 0</li>
+<li>即从左到右 删掉前置 0，到第一个非数值型字符为止。如果最左侧直接是非数值型 则直接转为 0</li>
+</ul>
+<h2 id="2-set-的数据会变为多少呢"><a href="#2-set-的数据会变为多少呢" class="headerlink" title="2.set 的数据会变为多少呢?"></a>2.set 的数据会变为多少呢?</h2><p>最终表里存储的数据就会变为取出前缀 0 之后存有的数据。<br>如</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> <span class="keyword">table</span> <span class="keyword">set</span> cloumn = <span class="number">0002000</span> <span class="keyword">where</span> cloumn = <span class="number">000100</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个 sql 最后 column 存储的就是’2000’.</p>
+<h1 id="进行测试"><a href="#进行测试" class="headerlink" title="进行测试"></a>进行测试</h1><p>我们先建一个表用来测试.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> movie(</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">11</span>) primary <span class="keyword">key</span> auto_increment <span class="keyword">comment</span> <span class="string">'主键'</span>,</span><br><span class="line">  <span class="string">`movie_code`</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'专资编码'</span>,</span><br><span class="line">  <span class="string">`movie_name`</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'影片名称'</span></span><br><span class="line">)<span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8mb4;</span><br></pre></td></tr></table></figure>
+
+<p>插入几条测试数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> movie(<span class="string">`movie_code`</span>, <span class="string">`movie_name`</span>)</span><br><span class="line"><span class="keyword">values</span>(<span class="string">'001'</span>, <span class="string">'影片1号'</span>), (<span class="string">'002'</span>, <span class="string">'影片2号'</span>), (<span class="string">'0001'</span>, <span class="string">'影片01号'</span>);</span><br></pre></td></tr></table></figure>
+
+<p>我们进行一次 update 操作</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> movie <span class="keyword">set</span> movie_code = <span class="number">007</span> <span class="keyword">where</span> movie_code = <span class="number">001</span>;</span><br></pre></td></tr></table></figure>
+
+<p>我们会发现有两条记录变更了,且新值是删掉前缀 0 的值。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> movie;</span><br><span class="line">+<span class="comment">----+------------+-------------+</span></span><br><span class="line">| id | movie_code | movie_name  |</span><br><span class="line">+<span class="comment">----+------------+-------------+</span></span><br><span class="line">|  1 | 7          | 影片1号     |</span><br><span class="line">|  2 | 002        | 影片2号     |</span><br><span class="line">|  3 | 7          | 影片01号    |</span><br><span class="line">+<span class="comment">----+------------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>我们在验证一下其他情况的类型转换.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> movie <span class="keyword">where</span> movie_name = <span class="number">0</span>;</span><br><span class="line">+<span class="comment">----+--------------+-------------+</span></span><br><span class="line">| id |  movie_code  | movie_name  |</span><br><span class="line">+<span class="comment">----+--------------+-------------+</span></span><br><span class="line">|  1 | 7            | 影片1号     |</span><br><span class="line">|  2 | 022          | 影片2号     |</span><br><span class="line">|  3 | 7            | 影片01号    |</span><br><span class="line">+<span class="comment">----+--------------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到,由于 varchar 数据都是以非数值性形式存储在匹配的时候所有的 movie_name 全转为了 0，所以导致所有数据都被查出来了.</p>
+<p>我们再新增一点数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> movie(<span class="string">`movie_code`</span>, <span class="string">`movie_name`</span>)</span><br><span class="line"><span class="keyword">values</span>(<span class="string">'001'</span>, <span class="string">'1号影片'</span>), (<span class="string">'002'</span>, <span class="string">'2号影片'</span>), (<span class="string">'0001'</span>, <span class="string">'01号影片'</span>), (<span class="string">'0001'</span>, <span class="string">'0号影片'</span>), (<span class="string">'0001'</span>, <span class="string">'1234号影片'</span>);</span><br></pre></td></tr></table></figure>
+
+<p>查询下所有记录行</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> movie;</span><br><span class="line">+<span class="comment">----+------------+---------------+</span></span><br><span class="line">| id | movie_code | movie_name    |</span><br><span class="line">+<span class="comment">----+------------+---------------+</span></span><br><span class="line">|  1 | 7          | 影片1号       |</span><br><span class="line">|  2 | 0          | 影片2号       |</span><br><span class="line">|  3 | 7          | 影片01号      |</span><br><span class="line">|  4 | 001        | 1号影片       |</span><br><span class="line">|  5 | 002        | 2号影片       |</span><br><span class="line">|  6 | 0001       | 01号影片      |</span><br><span class="line">|  7 | 0001       | 0号影片       |</span><br><span class="line">|  8 | 0001       | 1234号影片    |</span><br><span class="line">+<span class="comment">----+------------+---------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>然后再次查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> movie <span class="keyword">where</span> movie_name = <span class="number">0</span>;</span><br><span class="line">+<span class="comment">----+------------+-------------+</span></span><br><span class="line">| id | movie_code | movie_name  |</span><br><span class="line">+<span class="comment">----+------------+-------------+</span></span><br><span class="line">|  1 | 7          | 影片1号     |</span><br><span class="line">|  2 | 0          | 影片2号     |</span><br><span class="line">|  3 | 7          | 影片01号    |</span><br><span class="line">|  7 | 0001       | 0号影片     |</span><br><span class="line">+<span class="comment">----+------------+-------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>不难观察到，只会有隐式类型转换为 0 的被查出来了.</p>
+<p>至此. 隐式类型转换很好玩、感觉网络安全很重要.</p>
+
+      
+    </div>
+    
+    
+    
+	
+	<div>
+		
+		<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------<i class="fa fa-paw"></i>本文结束,感谢您的阅读！<i class="fa fa-paw"></i>-------------</div>
+    
+</div>
+		
+	</div>
+	
+    
+
+    
+
+    
+	
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/03/22/yuque/%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2%E6%B5%8B%E8%AF%95/" rel="prev" title="自动部署测试">
+                自动部署测试 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+  </script>
+
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/image/blog-logo.jpg"
+                alt="陈航" />
+            
+              <p class="site-author-name" itemprop="name">陈航</p>
+              <p class="site-description motion-element" itemprop="description">人一我百！人十我万！永不放弃~~~ 怀着自信的心，去追逐梦想</br> ——kuangbin</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">101</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/17602937887" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:545192053@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="tencent://AddContact/?fromId=45&fromSubId=1&subcmd=all&uin=545192053&website=www.oicqzone.com" target="_blank" title="QQ">
+                      
+                        <i class="fa fa-fw fa-qq"></i>QQ</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://codeforces.com/profile/Hang_cccccc" target="_blank" title="CF">
+                      
+                        <i class="fa fa-fw fa-code"></i>CF</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-apple"></i>
+                巨巨们的博客
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://oi-wiki.org/" title="oi-wiki" target="_blank">oi-wiki</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://zh.cppreference.com/w/%E9%A6%96%E9%A1%B5" title="cpp中文文档" target="_blank">cpp中文文档</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.shipudong.com/" title="【西建大Rank1 东哥】" target="_blank">【西建大Rank1 东哥】</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.wqh4u.cn/" title="【全能选手Euphoria】" target="_blank">【全能选手Euphoria】</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/lukelmouse/" title="【金牌选手lukelmouse】" target="_blank">【金牌选手lukelmouse】</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#场景描述"><span class="nav-number">1.</span> <span class="nav-text">场景描述:</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#这里有两点需要说明"><span class="nav-number">2.</span> <span class="nav-text">这里有两点需要说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-为什么-update-的时候可以匹配到数据"><span class="nav-number">2.1.</span> <span class="nav-text">1.为什么 update 的时候可以匹配到数据?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-set-的数据会变为多少呢"><span class="nav-number">2.2.</span> <span class="nav-text">2.set 的数据会变为多少呢?</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#进行测试"><span class="nav-number">3.</span> <span class="nav-text">进行测试</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">陈航</span>
+
+  
+</div>
+
+<div class=BbeiAn-info">
+  陕ICP备 -
+  <a href="http://www.beian.gov.cn/portal/registerSystemInfo?spm=5176.13841030.7y9jhqsfz.114.379a5c69PrmQbd" target="_blank" rel="noopener">
+16019742号-2</a>
+  </a>
+</div>
+
+
+
+ <script>
+      var now = new Date(); 
+      function createtime() { 
+          var grt= new Date("09/22/2018 12:00:00");//此处修改你的建站时间或者网站上线时间 
+          now.setTime(now.getTime()+250); 
+          days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days); 
+          hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours); 
+          if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum); 
+          mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;} 
+          seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum); 
+          snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;} 
+          document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 "; 
+          document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒"; 
+      } 
+  setInterval("createtime()",250);
+  </script>
+
+        
+<div class="busuanzi-count">
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user">访问人数</i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye">访问量</i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'tCSFEH4ih3s7b2RGPSDvPmP1-gzGzoHsz',
+        appKey: 'WO4AVxrr0A0gWce0eoma2UVh',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'5' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("tCSFEH4ih3s7b2RGPSDvPmP1-gzGzoHsz", "WO4AVxrr0A0gWce0eoma2UVh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+<!-- 页面点击小红心 --> 
+<script type="text/javascript" src="/js/src/love.js"></script>
